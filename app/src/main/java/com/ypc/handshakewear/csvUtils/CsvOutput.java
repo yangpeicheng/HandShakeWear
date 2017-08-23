@@ -14,7 +14,7 @@ import java.util.TimeZone;
  */
 
 public class CsvOutput {
-    private final String BASEDIR=android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
+    private final String BASEDIR=android.os.Environment.getExternalStorageDirectory().getAbsolutePath()+ File.separator+"data";
     private CSVWriter mCSVWriter=null;
     private String mFilePath=null;
     public CsvOutput(){
@@ -24,6 +24,10 @@ public class CsvOutput {
     }
     public CsvOutput(String filename){
         mFilePath=BASEDIR+ File.separator+filename;
+        File file=new File(BASEDIR);
+        if(!file.exists()){
+            file.mkdir();
+        }
         //mFilePath="/sdcard/"+File.separator+filename;
     }
     public void writeData(String[] value){

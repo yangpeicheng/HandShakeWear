@@ -13,6 +13,13 @@ public class Utils {
             0,1,0,
             0,0,1
     };
+    //levelcrossing alpha
+    public static final float ALPHA=0.3f;
+    //levecrossing excursions
+    public static final int EXCURSIONS=3;
+    //randomnextract
+    public static final int MALKOV_ORDER=4;
+    public static final int BLOCK_LEN=4;
     //获取长度为n的随机序列
     public static int[] getRandomSeq(int n){
         int[] seq=new int[n];

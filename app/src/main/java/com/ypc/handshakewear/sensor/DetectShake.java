@@ -24,9 +24,12 @@ public class DetectShake {
     private boolean currentState=true;
     private List<Integer> upIndex=new LinkedList<>();
     private List<Integer> downIndex=new LinkedList<>();
+    private boolean isClose=false;
     public DetectShake(){
     }
     public void handleSensorData(SensorData sensorData){
+        if(isClose)
+            return;
         float magnitude= Utils.getMagnitude(sensorData.getLinearAcceleration());
         mShakeData.add(sensorData.clone());
         mWindowData.add(magnitude);
@@ -38,11 +41,11 @@ public class DetectShake {
         currentState=(calculateVariance(mWindowData)<VARIANCE_THRESHOLD&&magnitude<MAGNITUDE_THRESHOLD);
         if(preState==true&&currentState==false){
             downIndex.add(index);
-            Log.i("down",String.valueOf(index));
+            //Log.i("down",String.valueOf(index));
         }
         else if(preState==false&&currentState==true){
             upIndex.add(index);
-            Log.i("up",String.valueOf(index));
+            //Log.i("up",String.valueOf(index));
         }
         preState=currentState;
         index++;
@@ -94,5 +97,9 @@ public class DetectShake {
         if(usefulData==null)
             judge();
         return usefulData;
+    }
+
+    public void close(){
+        isClose=true;
     }
 }

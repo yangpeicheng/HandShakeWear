@@ -7,8 +7,8 @@ import java.util.List;
  */
 public class LevelCrossing {
     private List<Byte> bits;
-    public LevelCrossing(List<float[]> data,float alpha){
-        List<Float> convertData=convert(data);
+    public LevelCrossing(List<float[]> data,float alpha,int bitsLength){
+        List<Float> convertData=convert(data,bitsLength);
         bits=generateTempBits(convertData,alpha);
     }
 
@@ -74,10 +74,10 @@ public class LevelCrossing {
         return result;
     }
     //将List<float[]>转换为List<Float>
-    private List<Float> convert(List<float[]> input){
+    private List<Float> convert(List<float[]> input,int bitsLength){
         List<Float> output=new LinkedList<>();
         for(int i=0;i<input.get(0).length;i++){
-            for(int j=0;j<input.size();j++){
+            for(int j=0;j<bitsLength;j++){
                 output.add(input.get(j)[i]);
             }
         }

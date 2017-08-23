@@ -10,7 +10,7 @@ import java.util.List;
 public class DataAlign {
     private List<Float> s1;
     private List<Float> s2;
-    private static final int RANGE=40;
+    private static final int RANGE=50;
     private float maxCor=0;
     public DataAlign(List<Float> alice,List<Float> bobo){
         s1=alice;
@@ -24,7 +24,7 @@ public class DataAlign {
         for(int i=0;i<RANGE;i++){
             start=i;
             end=E+i;
-            if(start<0||end>s2.size())
+            if(end>s2.size())
                 break;
             float cvdata=Utils.cross_correlation(s1,s2.subList(start,end));
             if(cvdata>maxCorrelation){
@@ -33,7 +33,7 @@ public class DataAlign {
             }
         }
         maxCor=maxCorrelation;
-        Log.i("max correlation:",String.valueOf(maxCor));
+        //Log.i("max correlation:",String.valueOf(maxCor));
         return maxStart;
     }
 

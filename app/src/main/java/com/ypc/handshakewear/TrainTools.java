@@ -1,5 +1,7 @@
 package com.ypc.handshakewear;
 
+import android.util.Log;
+
 import com.ypc.handshakewear.sensor.SensorData;
 
 import java.util.ArrayList;
@@ -29,8 +31,9 @@ public class TrainTools {
                 lastTimetamp=sensorData.getTimestamp();
             }
             else {
-                if(sensorData.getTimestamp()==lastTimetamp)
+                if(sensorData.getTimestamp()==lastTimetamp) {
                     continue;
+                }
                 float dt=(sensorData.getTimestamp()-lastTimetamp)*NS2S;
                 //System.out.println(dt);
                 lastTimetamp=sensorData.getTimestamp();
@@ -43,7 +46,6 @@ public class TrainTools {
                     preMatrix=currentMatrix;
                 }
             }
-
             //System.out.println(sensorData.getAcceleration()[0]);
             globalAcc.add(Utils.matrixMultiVector(currentMatrix,sensorData.getLinearAcceleration()));
         }

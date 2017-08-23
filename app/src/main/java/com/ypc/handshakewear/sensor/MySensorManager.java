@@ -30,7 +30,6 @@ public class MySensorManager {
         mSensorManager.registerListener(mSensorReader,mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),SensorManager.SENSOR_DELAY_GAME);
         mSensorManager.registerListener(mSensorReader,mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),SensorManager.SENSOR_DELAY_GAME);
         mSensorManager.registerListener(mSensorReader,mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),SensorManager.SENSOR_DELAY_GAME);
-        mSensorManager.registerListener(mSensorReader,mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),SensorManager.SENSOR_DELAY_GAME);
         isStart=true;
     }
 
@@ -42,7 +41,6 @@ public class MySensorManager {
         mSensorManager.unregisterListener(mSensorReader,mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
         mSensorManager.unregisterListener(mSensorReader,mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY));
         mSensorManager.unregisterListener(mSensorReader,mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION));
-        mSensorManager.unregisterListener(mSensorReader,mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR));
     }
 
     //读取当前传感器数据

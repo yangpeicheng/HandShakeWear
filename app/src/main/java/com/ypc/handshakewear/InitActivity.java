@@ -26,14 +26,14 @@ public class InitActivity extends Activity {
                 startMaster.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent=new Intent(InitActivity.this,MasterActivity.class);
+                        Intent intent=new Intent(InitActivity.this,MasterWatchActivity.class);
                         startActivity(intent);
                     }
                 });
                 startSlave.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent=new Intent(InitActivity.this,SlaveActivity.class);
+                        Intent intent=new Intent(InitActivity.this,SlaveWatchActivity.class);
                         startActivity(intent);
                     }
                 });

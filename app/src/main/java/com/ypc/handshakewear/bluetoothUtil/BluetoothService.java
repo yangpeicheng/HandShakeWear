@@ -8,13 +8,10 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
-import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 
-import com.ypc.handshakewear.MasterActivity;
+import com.ypc.handshakewear.BluetoothBaseActivity;
 import com.ypc.handshakewear.ReconcilationData;
 import com.ypc.handshakewear.sensor.SensorData;
 
@@ -51,7 +48,6 @@ public class BluetoothService {
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
-    private Context mContext;
 
     // Constants that indicate the current connection state
     public static final int STATE_NONE = 0;       // we're doing nothing
@@ -61,15 +57,13 @@ public class BluetoothService {
 
     /**
      * Constructor. Prepares a new BluetoothSync session.
-     *
-     * @param context The UI Activity Context
      * @param handler A Handler to send messages back to the UI Activity
      */
-    public BluetoothService(Context context, Handler handler) {
+    public BluetoothService( Handler handler) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
+
         mState = STATE_NONE;
         mHandler = handler;
-        mContext=context;
     }
 
     /**
@@ -84,7 +78,7 @@ public class BluetoothService {
         mState = state;
 
         // Give the new state to the Handler so the UI Activity can update
-        mHandler.obtainMessage(MasterActivity.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
+        mHandler.obtainMessage(BluetoothBaseActivity.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
     }
 
     /**
@@ -192,12 +186,12 @@ public class BluetoothService {
         mConnectedThread.start();
 
         // Send the name of the connected device back to the UI Activity
-        Message msg = mHandler.obtainMessage(MasterActivity.MESSAGE_DEVICE_NAME);
+        /*Message msg = mHandler.obtainMessage(MasterActivity.MESSAGE_DEVICE_NAME);
         Bundle bundle = new Bundle();
         bundle.putString(MasterActivity.DEVICE_NAME, device.getName());
         bundle.putBoolean(MasterActivity.IS_SERVER, server);
         msg.setData(bundle);
-        mHandler.sendMessage(msg);
+        mHandler.sendMessage(msg);*/
 
         setState(STATE_CONNECTED);
     }
@@ -285,7 +279,7 @@ public class BluetoothService {
         r.write(code,isEven);
     }
 
-    public void writeStart(int code){
+    public void write(int code,int length){
         ConnectedThread r;
         synchronized (this){
             if (mState != STATE_CONNECTED) {
@@ -293,7 +287,18 @@ public class BluetoothService {
             }
             r = mConnectedThread;
         }
-        r.writeStart(code);
+        r.write(code,length);
+    }
+
+    public void write(int code){
+        ConnectedThread r;
+        synchronized (this){
+            if (mState != STATE_CONNECTED) {
+                return;
+            }
+            r = mConnectedThread;
+        }
+        r.write(code);
     }
 
 
@@ -302,11 +307,11 @@ public class BluetoothService {
      */
     private void connectionFailed() {
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(MasterActivity.MESSAGE_TOAST);
+        /*Message msg = mHandler.obtainMessage(BluetoothBaseActivity.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
         bundle.putString(MasterActivity.TOAST, "Unable to connect device");
         msg.setData(bundle);
-        mHandler.sendMessage(msg);
+        mHandler.sendMessage(msg);*/
 
         // Start the service over to restart listening mode
         BluetoothService.this.start();
@@ -317,11 +322,11 @@ public class BluetoothService {
      */
     private void connectionLost() {
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(MasterActivity.MESSAGE_TOAST);
+        /*Message msg = mHandler.obtainMessage(MasterActivity.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
         bundle.putString(MasterActivity.TOAST, "Device connection was lost");
         msg.setData(bundle);
-        mHandler.sendMessage(msg);
+        mHandler.sendMessage(msg);*/
 
         // Start the service over to restart listening mode
         BluetoothService.this.start();
@@ -516,39 +521,39 @@ public class BluetoothService {
                     int code = mmInStream.readInt();
                     System.out.println(String.format("code:%d",code));
                     //Toast.makeText(mContext,"index rec",Toast.LENGTH_SHORT).show();
-                    if (code == MasterActivity.CODE_POSTS) {
+                    if (code == BluetoothBaseActivity.CODE_POSTS) {
                         // todo - process received posts one at a time, otherwise too much memory used
                         SensorData sensorData = new SensorData();
                         sensorData.read(mmInStream);
                         // Send the obtained bytes to the UI Activity
-                        mHandler.obtainMessage(MasterActivity.MESSAGE_READ, code, -1, sensorData).sendToTarget();
-                    }else if(code==MasterActivity.CODE_START||code==MasterActivity.CODE_END||code==MasterActivity.CODE_FINISH){
-                        mHandler.obtainMessage(MasterActivity.MESSAGE_READ,code,-1,null).sendToTarget();
+                        mHandler.obtainMessage(BluetoothBaseActivity.MESSAGE_READ, code, -1, sensorData).sendToTarget();
+                    }else if(code==BluetoothBaseActivity.CODE_END||code==BluetoothBaseActivity.CODE_FINISH){
+                        mHandler.obtainMessage(BluetoothBaseActivity.MESSAGE_READ,code,-1,null).sendToTarget();
+                    }else if(code==BluetoothBaseActivity.CODE_START){
+                        int length=mmInStream.readInt();
+                        mHandler.obtainMessage(BluetoothBaseActivity.MESSAGE_READ,code,-1,length).sendToTarget();
                     }
-                    /*else if(code==MasterActivity.CODE_FINISH){
-                        mHandler.obtainMessage(MasterActivity.MESSAGE_READ,code,-1,null).sendToTarget();
-                    }*/
-                    else if(code==MasterActivity.CODE_MASTER_INDEX){
+                    else if(code==BluetoothBaseActivity.CODE_MASTER_INDEX){
                         System.out.println(String.format("commit code:%d",code));
                         int n=mmInStream.readInt();
                         List<Integer> list=new LinkedList<>();
                         for(int i=0;i<n;i++){
                             list.add(mmInStream.readInt());
                         }
-                        mHandler.obtainMessage(MasterActivity.MESSAGE_READ,code,-1,list).sendToTarget();
+                        mHandler.obtainMessage(BluetoothBaseActivity.MESSAGE_READ,code,-1,list).sendToTarget();
                     }
-                    else if(code==MasterActivity.CODE_CASCADE){
+                    else if(code==BluetoothBaseActivity.CODE_CASCADE){
                         ReconcilationData reconcilationData=new ReconcilationData(0,0,0,0);
                         reconcilationData.read(mmInStream);
-                        mHandler.obtainMessage(MasterActivity.MESSAGE_READ,code,-1,reconcilationData).sendToTarget();
+                        mHandler.obtainMessage(BluetoothBaseActivity.MESSAGE_READ,code,-1,reconcilationData).sendToTarget();
                     }
-                    else if(code==MasterActivity.CODE_ISEVEN){
+                    else if(code==BluetoothBaseActivity.CODE_ISEVEN){
                         boolean isEven=mmInStream.readBoolean();
-                        mHandler.obtainMessage(MasterActivity.MESSAGE_READ,code,-1,isEven).sendToTarget();
+                        mHandler.obtainMessage(BluetoothBaseActivity.MESSAGE_READ,code,-1,isEven).sendToTarget();
                     }
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
-                    connectionLost();
+                    //connectionLost();
                     // Start the service over to restart listening mode
                     //BluetoothService.this.start();
                     break;
@@ -564,7 +569,7 @@ public class BluetoothService {
                 mmOutStream.writeInt(code);
                 sensorData.write(mmOutStream);
                 // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(MasterActivity.MESSAGE_WRITE, code, -1, sensorData).sendToTarget();
+                mHandler.obtainMessage(BluetoothBaseActivity.MESSAGE_WRITE, code, -1, sensorData).sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
             }
@@ -573,10 +578,10 @@ public class BluetoothService {
         /**
           * Write start code
         */
-        public void writeStart(int code){
+        public void write(int code){
             try{
                 mmOutStream.writeInt(code);
-                mHandler.obtainMessage(MasterActivity.MESSAGE_WRITE,code).sendToTarget();
+                mHandler.obtainMessage(BluetoothBaseActivity.MESSAGE_WRITE,code).sendToTarget();
 
             }catch (IOException e){
                 Log.e(TAG, "Exception during write", e);
@@ -588,7 +593,7 @@ public class BluetoothService {
                 mmOutStream.writeInt(list.size());
                 for(int i:list)
                     mmOutStream.writeInt(i);
-                mHandler.obtainMessage(MasterActivity.MESSAGE_WRITE,code,-1,list).sendToTarget();
+                mHandler.obtainMessage(BluetoothBaseActivity.MESSAGE_WRITE,code,-1,list).sendToTarget();
             }
             catch (IOException e){
                 Log.e(TAG, "Exception during write", e);
@@ -598,7 +603,7 @@ public class BluetoothService {
             try {
                 mmOutStream.writeInt(code);
                 data.write(mmOutStream);
-                mHandler.obtainMessage(MasterActivity.MESSAGE_WRITE,code,-1,data).sendToTarget();
+                mHandler.obtainMessage(BluetoothBaseActivity.MESSAGE_WRITE,code,-1,data).sendToTarget();
             }
             catch (IOException e){
                 Log.e(TAG, "Exception during write", e);
@@ -608,7 +613,17 @@ public class BluetoothService {
             try {
                 mmOutStream.writeInt(code);
                 mmOutStream.writeBoolean(isEven);
-                mHandler.obtainMessage(MasterActivity.MESSAGE_WRITE,code).sendToTarget();
+                mHandler.obtainMessage(BluetoothBaseActivity.MESSAGE_WRITE,code).sendToTarget();
+            }
+            catch (IOException e){
+                Log.e(TAG, "Exception during write", e);
+            }
+        }
+        public void write(int code,int length){
+            try {
+                mmOutStream.writeInt(code);
+                mmOutStream.writeInt(length);
+                mHandler.obtainMessage(BluetoothBaseActivity.MESSAGE_WRITE,code).sendToTarget();
             }
             catch (IOException e){
                 Log.e(TAG, "Exception during write", e);

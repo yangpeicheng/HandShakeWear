@@ -22,7 +22,7 @@ public  class SensorReader implements SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         if(event.sensor.getType()== Sensor.TYPE_ACCELEROMETER){
             //mSensorData.setAcceleration(event.values.clone());
-            //mSensorData.setAcceleration(mAccelerationMeanSmooth.addSamples(event.values));
+            mSensorData.setAcceleration(mAccelerationMeanSmooth.addSamples(event.values));
         }
         else if(event.sensor.getType()==Sensor.TYPE_GYROSCOPE){
             //mSensorData.setGyroscope(event.values.clone());
@@ -38,11 +38,6 @@ public  class SensorReader implements SensorEventListener {
         else if(event.sensor.getType()==Sensor.TYPE_LINEAR_ACCELERATION){
             mSensorData.setLinearAcceleration(mLinearAccelerationMeanSmooth.addSamples(event.values));
             mSensorData.setTimestamp(event.timestamp);
-        }
-        else if(event.sensor.getType()==Sensor.TYPE_ROTATION_VECTOR){
-            float[] rotationmatrix=new float[9];
-            SensorManager.getRotationMatrixFromVector(rotationmatrix,event.values);
-            mSensorData.setAcceleration(Utils.matrixMultiVector(rotationmatrix,mSensorData.getLinearAcceleration()));
         }
     }
 
