@@ -25,11 +25,18 @@ public class DetectShake {
     private List<Integer> upIndex=new LinkedList<>();
     private List<Integer> downIndex=new LinkedList<>();
     private boolean isClose=false;
+    private long lastTimestamp=0;
     public DetectShake(){
     }
     public void handleSensorData(SensorData sensorData){
         if(isClose)
             return;
+        if(lastTimestamp==sensorData.getTimestamp()){
+            return;
+        }
+        else {
+            lastTimestamp=sensorData.getTimestamp();
+        }
         float magnitude= Utils.getMagnitude(sensorData.getLinearAcceleration());
         mShakeData.add(sensorData.clone());
         mWindowData.add(magnitude);
